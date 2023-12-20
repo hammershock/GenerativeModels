@@ -22,6 +22,10 @@ class ConditionalConvVAE(nn.Module):
         # 对类别标签进行编码的线性层
         self.label_embedding = nn.Embedding(num_classes, num_classes)
 
+        output_shape = (1024, 4, 4)
+
+        output_dim = output_shape[0] * output_shape[1] * output_shape[2]
+
         # 编码器
         self.encoder = nn.Sequential(
             nn.Conv2d(channels + num_classes, 64, kernel_size=3, stride=2, padding=1),
@@ -30,17 +34,14 @@ class ConditionalConvVAE(nn.Module):
             nn.ReLU(),
             nn.Conv2d(256, 1024, kernel_size=3, stride=2, padding=1),  # output: 1024 x 8 x 8
             nn.ReLU(),
-            nn.Flatten()
+            nn.Flatten(),
         )
 
-        output_shape = (1024, 4, 4)
-
-        output_dim = output_shape[0] * output_shape[1] * output_shape[2]
         self.enc_mu = nn.Linear(output_dim, potential_dim)  # 均值
         self.enc_log_var = nn.Linear(output_dim, potential_dim)  # 对数方差
-
         # 解码器
         self.decoder_fc = nn.Linear(potential_dim + num_classes, output_dim)
+
         self.decoder = nn.Sequential(
             nn.Unflatten(1, output_shape),
             nn.ConvTranspose2d(1024, 256, kernel_size=3, stride=2, padding=1, output_padding=1),
@@ -87,7 +88,6 @@ class ConditionalConvVAE(nn.Module):
         reconstructed_x = self.decode(z, labels)
         return reconstructed_x, mu, log_var
 
-
 class DatasetType(Enum):
     cifar10 = 'cifar10'
     mnist = 'mnist'
@@ -103,7 +103,7 @@ class Generator:
         model_path = f'models/cvae_{datasetType.name}.pth'
         CHANNELS = 1 if datasetType in [DatasetType.mnist, DatasetType.fashion_mnist] else 3
         NUM_CLASSES = 10
-        self.model = ConditionalConvVAE(potential_dim=16, channels=CHANNELS, num_classes=NUM_CLASSES)
+        self.model = ConditionalConvVAE(potential_dim=8, channels=CHANNELS, num_classes=NUM_CLASSES)
         self.model.load_state_dict(torch.load(model_path))
         self.model.to(device)
 
@@ -233,6 +233,6 @@ if __name__ == "__main__":
     elif args.svhn:
         app = App(DatasetType.svhn)
     else:
-        app = App(DatasetType.mnist)
+        app = App(DatasetType.svhn)
         # raise ValueError("Please specify a dataset using --mnist or --cifar10.")
     app.run()
