@@ -2,6 +2,7 @@ import argparse
 import tkinter as tk
 from enum import Enum
 from tkinter import ttk
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -233,6 +234,6 @@ if __name__ == "__main__":
     elif args.svhn:
         app = App(DatasetType.svhn)
     else:
-        app = App(DatasetType.mnist)
+        app = App(DatasetType.cifar10)
         # raise ValueError("Please specify a dataset using --mnist or --cifar10.")
     app.run()

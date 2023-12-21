@@ -12,23 +12,31 @@ VAE的原理：
 - 使用重构误差（y与x的误差）和编码空间的KL散度损失同时对模型进行约束。
 
 本实验工作内容如下：
-- 以`CIFAR-10`和`MNIST`数据集为例，展示条件变分自动编码机（ConditionalVAE，CVAE）的训练和评估
-- 提供了美丽的UI界面，用于展示潜在空间的连续性
+- 以`CIFAR-10`和`MNIST`、`fashion_mnist`、`svhn`和`celeba`数据集为例，展示条件变分自动编码机（ConditionalVAE，CVAE）用作图像生成模型的训练和评估
+- 提供了美丽的UI界面，可以展示潜在空间的连续性
 - 复现了CVAE作为贝叶斯模型，在训练时遇到的“后验坍缩”问题
 
-训练过程代码：`ConditionalVAE.ipynb`
+celeba人脸数据集训练源代码：`celeba.ipynb`
+其他数据集训练源代码：`ConditionalVAE.ipynb`
 
 运行GUI演示：
-```
-python cvae_visualizer.py --<数据集>
-
-python cvae_visualizer.py --mnist
-python cvae_visualizer.py --cifar10
-python cvae_visualizer.py --fashion_mnist
-python cvae_visualizer.py --svhn
-```
+1. celeba人脸合成：
+    ```
+    python cvae_celeba_visualizer.py
+    ```
+2. 其他数据集上的条件生成：
+    ```
+    python cvae_visualizer.py --<数据集>
+    
+    python cvae_visualizer.py --mnist
+    python cvae_visualizer.py --cifar10
+    python cvae_visualizer.py --fashion_mnist
+    python cvae_visualizer.py --svhn
+    ```
 
 效果如下：
+
+![demo_face.gif](assets%2Fdemo_face.gif)
 
 ![demo.gif](assets%2Fdemo.gif)
 
