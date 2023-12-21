@@ -20,11 +20,15 @@ celeba人脸数据集训练源代码：`celeba.ipynb`
 其他数据集训练源代码：`ConditionalVAE.ipynb`
 
 运行GUI演示：
-1. celeba人脸合成：
+1. 首先安装依赖：
+   ```
+   pip install -r requirements.txt
+   ```
+2. celeba人脸合成：
     ```
     python cvae_celeba_visualizer.py
     ```
-2. 其他数据集上的条件生成：
+3. 其他数据集上的条件生成：
     ```
     python cvae_visualizer.py --<数据集>
     

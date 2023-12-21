@@ -234,6 +234,6 @@ if __name__ == "__main__":
     elif args.svhn:
         app = App(DatasetType.svhn)
     else:
-        app = App(DatasetType.cifar10)
+        app = App(DatasetType.mnist)
         # raise ValueError("Please specify a dataset using --mnist or --cifar10.")
     app.run()
