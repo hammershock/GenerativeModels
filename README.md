@@ -1,7 +1,6 @@
 # GenerativeModels 生成式模型
-### ConditionalVAEs、GANs
+### 以ConditionalVAEs、GANs为例展示生成式模型的训练和推理
 
-### A8: Generative Models 生成式模型
 - 在上个章节中，我们介绍了自动编码器及其变种。`自动编码机(AutoEncoders)`通过学习y=x的恒等变换实现在无监督训练自动提取特征。自动编码机的变种，包括`稀疏自动编码机（SparseAEs）`、`去噪自动编码机（DenoisingAEs）`，通过训练技巧提升了编码的稀疏性和鲁棒性。这一类常常被用于特征提取和降维任务。但是对于生成任务而言，他们并不合适，原因在于原始数据分布在编码器复杂非线性变换的投射下未必是规则的，这不利于我们在生成采样时令解码器得到有意义的结果。
 - 变分自动编码机（VAE），借鉴了贝叶斯方法中的变分推断技术，在训练模型学习恒等变换的同时通过引入对编码空间的KL散度进行正则化，使得编码空间在编码过程中保持良好的规范性，有利于在编码空间的采样与插值。
 - VAE也可以实现一种有监督的变种：条件变分自动编码机（ConditionalVAE，CVAE），可引入标签数据，实现有标签的生成任务。
@@ -24,24 +23,26 @@ celeba人脸数据集训练源代码：`celeba.ipynb`
    ```
    pip install -r requirements.txt
    ```
-2. celeba人脸合成：
+2. CVAE图像生成：
     ```
-    python cvae_celeba_visualizer.py
+    python app.py
     ```
-3. 其他数据集上的条件生成：
-    ```
-    python cvae_visualizer.py --<数据集>
-    
-    python cvae_visualizer.py --mnist
-    python cvae_visualizer.py --cifar10
-    python cvae_visualizer.py --fashion_mnist
-    python cvae_visualizer.py --svhn
-    ```
+3.
+   app功能：
+   - 可以切换数据集种类，使用训练好的不同模型文件，模型目录：`models/`
+   - 根据不同的标签类别生成图像
+   - 提供按钮，开始在latent space随机游走，并展示图像的变化
 
-效果如下：
+训练部分源代码请见: `ConditionalVAE.ipynb`, 针对celeba数据集使用的模型在标签嵌入上稍有不同，请见`celeba.ipynb`。
 
-![demo_face.gif](assets%2Fdemo_face.gif)
+演示效果如下：
 
-![demo.gif](assets%2Fdemo.gif)
+![demo_app1.gif](assets%2Fdemo_app1.gif)
 
-![demo2.gif](assets%2Fdemo2.gif)
+![demo_app2.gif](assets%2Fdemo_app2.gif)
+
+![demo_app3.gif](assets%2Fdemo_app3.gif)
+
+![demo_app4.gif](assets%2Fdemo_app4.gif)
+
+![demo_app5.gif](assets%2Fdemo_app5.gif)

@@ -23,20 +23,26 @@ class ConditionalConvVAE(nn.Module):
         # 对类别标签进行编码的线性层
         self.label_embedding = nn.Embedding(num_classes, num_classes)
 
-        output_shape = (1024, 4, 4)
-
-        output_dim = output_shape[0] * output_shape[1] * output_shape[2]
-
-        # 编码器
+        # 卷积输出形状：
+        # output_size = [(input_size - kernel_size + 2 * padding)/stride] + 1
+        # 反卷积输出形状：
+        # output_size = (input_size - 1) * stride -2 * padding + kernel_Size + output_padding
         self.encoder = nn.Sequential(
-            nn.Conv2d(channels + num_classes, 64, kernel_size=3, stride=2, padding=1),
+            nn.Conv2d(channels + num_classes, 128, kernel_size=3, stride=2, padding=1),  # 16
             nn.ReLU(),
-            nn.Conv2d(64, 256, kernel_size=3, stride=2, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(256, 1024, kernel_size=3, stride=2, padding=1),  # output: 1024 x 8 x 8
-            nn.ReLU(),
+            nn.Conv2d(128, 128, kernel_size=3, stride=2, padding=1),
+            nn.ReLU(),  # 8
+            nn.Conv2d(128, 128, kernel_size=3, stride=2, padding=1),
+            nn.ReLU(),  # 4
+            nn.Conv2d(128, 128, kernel_size=3, stride=2, padding=1),
+            nn.ReLU(),  # 2
+            nn.Conv2d(128, 128, kernel_size=3, stride=2, padding=1),
+            nn.ReLU(),  # 1
             nn.Flatten(),
         )
+
+        output_shape = (128, 1, 1)
+        output_dim = output_shape[0] * output_shape[1] * output_shape[2]
 
         self.enc_mu = nn.Linear(output_dim, potential_dim)  # 均值
         self.enc_log_var = nn.Linear(output_dim, potential_dim)  # 对数方差
@@ -44,23 +50,27 @@ class ConditionalConvVAE(nn.Module):
         self.decoder_fc = nn.Linear(potential_dim + num_classes, output_dim)
 
         self.decoder = nn.Sequential(
-            nn.Unflatten(1, output_shape),
-            nn.ConvTranspose2d(1024, 256, kernel_size=3, stride=2, padding=1, output_padding=1),
-            nn.ReLU(),
-            nn.ConvTranspose2d(256, 64, kernel_size=3, stride=2, padding=1, output_padding=1),
-            nn.ReLU(),
-            nn.ConvTranspose2d(64, channels, kernel_size=3, stride=2, padding=1, output_padding=1),
-            # output: channel x 28 x 28
-            nn.Sigmoid()
+            nn.Unflatten(1, output_shape),  # 1
+            nn.ConvTranspose2d(128, 128, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.ReLU(),  # 2
+            nn.ConvTranspose2d(128, 128, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.ReLU(),  # 4
+            nn.ConvTranspose2d(128, 128, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.ReLU(),  # 8
+            nn.ConvTranspose2d(128, 128, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.ReLU(),  # 16
+            nn.ConvTranspose2d(128, channels, kernel_size=3, stride=2, padding=1, output_padding=1),
+            # nn.AdaptiveAvgPool2d((178, 218)),
+            nn.Sigmoid()  # 32
         )
 
     def encode(self, x, labels):
         # 将标签嵌入到与图像相同的维度
-        labels = self.label_embedding(labels).unsqueeze(2).unsqueeze(3)
-        labels = labels.expand(labels.size(0), labels.size(1), x.size(2), x.size(3))
+        labels = self.label_embedding(labels).unsqueeze(2).unsqueeze(3)  # (128, 10, 1, 1)
+        labels = labels.expand(labels.size(0), labels.size(1), x.size(2), x.size(3))  # (128, 10, 32, 32)
 
         # 将标签和图像连接起来
-        x = torch.cat((x, labels), dim=1)
+        x = torch.cat((x, labels), dim=1)  # (128, 11, 32, 32)
 
         # 传入编码器
         x = self.encoder(x)
@@ -88,6 +98,7 @@ class ConditionalConvVAE(nn.Module):
         z, mu, log_var = self.encode(x, labels)
         reconstructed_x = self.decode(z, labels)
         return reconstructed_x, mu, log_var
+
 
 class DatasetType(Enum):
     cifar10 = 'cifar10'
@@ -234,6 +245,6 @@ if __name__ == "__main__":
     elif args.svhn:
         app = App(DatasetType.svhn)
     else:
-        app = App(DatasetType.mnist)
+        app = App(DatasetType.cifar10)
         # raise ValueError("Please specify a dataset using --mnist or --cifar10.")
     app.run()
